@@ -54,8 +54,10 @@ spec:
           envFrom:
           - configMapRef:
               name: {{ include "enclave-signer-registry.fullname" . }}-bridge-config
-          # - secretRef:
-          #     name: {{ include "enclave-signer-registry.fullname" . }}-secret
+          {{- if .Values.secrets.enabled }}
+          - secretRef:
+              name: {{ include "enclave-signer-registry.fullname" . }}-secret
+          {{- end }}
           ports:
 {{- range .Values.bridge.ports }}
             - name: {{ .name }}
