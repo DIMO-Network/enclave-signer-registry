@@ -46,25 +46,25 @@ func NewController(
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert hex to ecdsa private key: %w", err)
 	}
-	tokenID, err := devLicenseClient.GetTokenID(settings.DevLicenseContract)
+	tokenID, err := devLicenseClient.GetTokenID(settings.DeveloperLicense)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get token ID From DevLicense '%s': %w", settings.DevLicenseContract.Hex(), err)
+		return nil, fmt.Errorf("failed to get token ID From DevLicense '%s': %w", settings.DeveloperLicense.Hex(), err)
 	}
 	if tokenID == nil || tokenID.Sign() == 0 {
-		return nil, fmt.Errorf("token ID is nil or zero for DevLicense '%s'", settings.DevLicenseContract.Hex())
+		return nil, fmt.Errorf("token ID is nil or zero for DevLicense '%s'", settings.DeveloperLicense.Hex())
 	}
 	owner, err := devLicenseClient.GetOwner(tokenID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get owner from DevLicense '%s': %w", settings.DevLicenseContract.Hex(), err)
+		return nil, fmt.Errorf("failed to get owner from DevLicense '%s': %w", settings.DeveloperLicense.Hex(), err)
 	}
 	publicAddress := crypto.PubkeyToAddress(privateKey.PublicKey)
 	if owner.Hex() != publicAddress.Hex() {
-		return nil, fmt.Errorf("'%s' is not owner of dev license '%s'", publicAddress.Hex(), settings.DevLicenseContract.Hex())
+		return nil, fmt.Errorf("'%s' is not owner of dev license '%s'", publicAddress.Hex(), settings.DeveloperLicense.Hex())
 	}
 	return &Controller{
 		logger:            logger,
 		privateKey:        privateKey,
-		devLicense:        settings.DevLicenseContract,
+		devLicense:        settings.DeveloperLicense,
 		devLicenseTokenID: tokenID,
 		validPCRs:         settings.PCRs,
 		getCertFunc:       getCertFunc,
