@@ -48,11 +48,14 @@ func NewController(
 	}
 	tokenID, err := devLicenseClient.GetTokenID(settings.DevLicenseContract)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get token ID From DevLicense: %w", err)
+		return nil, fmt.Errorf("failed to get token ID From DevLicense '%s': %w", settings.DevLicenseContract.Hex(), err)
+	}
+	if tokenID == nil || tokenID.Sign() == 0 {
+		return nil, fmt.Errorf("token ID is nil or zero for DevLicense '%s'", settings.DevLicenseContract.Hex())
 	}
 	owner, err := devLicenseClient.GetOwner(tokenID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get owner from DevLicense: %w", err)
+		return nil, fmt.Errorf("failed to get owner from DevLicense '%s': %w", settings.DevLicenseContract.Hex(), err)
 	}
 	publicAddress := crypto.PubkeyToAddress(privateKey.PublicKey)
 	if owner.Hex() != publicAddress.Hex() {
