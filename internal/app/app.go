@@ -23,8 +23,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func CreateEnclaveWebServer(logger *zerolog.Logger, clientPort uint32, settings *config.Settings) (*fiber.App, *tls.Config, error) {
-
+func CreateEnclaveWebServer(ctx context.Context, logger *zerolog.Logger, clientPort uint32, settings *config.Settings) (*fiber.App, *tls.Config, error) {
 	// Setup HTTP client
 	httpClient := client.NewHTTPClient(clientPort, nil)
 	var certFunc certs.GetCertificateFunc
@@ -40,7 +39,7 @@ func CreateEnclaveWebServer(logger *zerolog.Logger, clientPort uint32, settings 
 		}
 		certFunc = tlsConfig.GetCertificate
 	}
-	devLicenseClient, err := devlicense.NewClient(settings)
+	devLicenseClient, err := devlicense.NewClient(ctx, settings, httpClient)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create dev license client: %w", err)
 	}

@@ -120,7 +120,7 @@ func main() {
 	logger.Info().Msgf("Listening on %s", listener.Addr())
 
 	// Create the enclave server using the new listener and logger
-	enclaveApp, tlsConfig, err := app.CreateEnclaveWebServer(&logger, clientTunnelPort, &settings)
+	enclaveApp, tlsConfig, err := app.CreateEnclaveWebServer(ctx, &logger, clientTunnelPort, &settings)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Couldn't create enclave web server.")
 	}

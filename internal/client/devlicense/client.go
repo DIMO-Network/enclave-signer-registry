@@ -5,12 +5,14 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"math/big"
+	"net/http"
 
 	"github.com/DIMO-Network/enclave-signer-registry/internal/config"
 	"github.com/DIMO-Network/enclave-signer-registry/internal/contracts/devlicensedimo"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
 )
 
 // Client represents a client for interacting with the DevLicense contract.
@@ -23,12 +25,13 @@ type Client struct {
 // NewClient creates a new DevLicense client using the provided configuration.
 // It establishes a connection to the Ethereum network and initializes the contract instance.
 // Returns an error if any of the initialization steps fail.
-func NewClient(cfg *config.Settings) (*Client, error) {
+func NewClient(ctx context.Context, cfg *config.Settings, httpClient *http.Client) (*Client, error) {
 	// Connect to the Ethereum client
-	client, err := ethclient.Dial(cfg.EthereumRPCURL)
+	rpcClient, err := rpc.DialOptions(ctx, cfg.EthereumRPCURL, rpc.WithHTTPClient(httpClient))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Ethereum client: %w", err)
 	}
+	client := ethclient.NewClient(rpcClient)
 
 	// Create the contract instance
 	contract, err := devlicensedimo.NewDevlicensedimo(cfg.DevLicenseContract, client)
