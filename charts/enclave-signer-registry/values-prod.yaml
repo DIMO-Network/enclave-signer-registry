@@ -1,0 +1,29 @@
+replicaCount: 1
+bridge:
+  env:
+    LOG_LEVEL: INFO
+enclave:
+  image:
+    tag: 30ba023
+  env:
+    ENCLAVE_CPU_COUNT: "2"
+    ENCLAVE_MEMORY_SIZE: "1000"
+    ENCLAVE_CID: "16"
+    ENCLAVE_DEBUG_MODE: null
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/auth-tls-secret: ingress/cf-origin-ca
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+    nginx.ingress.kubernetes.io/limit-rps: "50"
+    external-dns.alpha.kubernetes.io/hostname: enclave-signer-registry.dimo.zone
+  hosts:
+    - host: enclave-signer-registry.dimo.zone
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []

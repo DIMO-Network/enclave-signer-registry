@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "enclave-signer-registry.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "enclave-signer-registry.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      {{- include "enclave-signer-registry.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/bridgeconfig: {{ include (print $.Template.BasePath "/bridge-envconfigmap.yaml") . | sha256sum }}
+        checksum/appconfig: {{ include (print $.Template.BasePath "/envconfigmap.yaml") . | sha256sum }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "enclave-signer-registry.selectorLabels" . | nindent 8 }}
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            {{- include "enclave-signer-registry.selectorLabels" . | nindent 12 }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "enclave-signer-registry.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers: []
+      containers:
+        - name: enclave-bridge
+          securityContext:
+            {{- toYaml .Values.bridge.securityContext | nindent 12 }}
+          image: "{{ .Values.bridge.image.repository }}:{{ .Values.bridge.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.bridge.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ include "enclave-signer-registry.fullname" . }}-bridge-config
+          # - secretRef:
+          #     name: {{ include "enclave-signer-registry.fullname" . }}-secret
+          ports:
+{{- range .Values.bridge.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .containerPort }}
+              protocol: {{ .protocol }}
+{{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: mon-http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: mon-http
+          resources:
+            {{- toYaml .Values.bridge.resources | nindent 12 }}
+        - name: enclave-signer-registry
+          securityContext:
+            {{- toYaml .Values.app.securityContext | nindent 12 }}
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ include "enclave-signer-registry.fullname" . }}-app-config
+          # - secretRef:
+          #     name: {{ include "enclave-signer-registry.fullname" . }}-secret
+          livenessProbe:
+            exec:
+              command:
+                - /run.sh
+                - 'healthcheck'
+            failureThreshold: 2
+            initialDelaySeconds: 10
+          resources:
+            {{- toYaml .Values.app.resources | nindent 12 }}
+          volumeMounts:
+            - name: nitro-enclaves
+              mountPath: /dev/nitro_enclaves
+            - name: hugepage-1gi
+              mountPath: /dev/hugepages
+              readOnly: false
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: nitro-enclaves
+        hostPath:
+          path: /dev/nitro_enclaves
+      - name: hugepage-1gi
+        emptyDir:
+          medium: HugePages-1Gi
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "enclave-signer-registry.fullname" . }}-bridge-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "enclave-signer-registry.labels" . | nindent 4 }}
+data:
+{{- range $key, $val := .Values.bridge.env }}
+  {{ $key }} : {{ $val | quote }}
+{{- end}}

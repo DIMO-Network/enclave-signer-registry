@@ -1,0 +1,91 @@
+package devlicense
+
+import (
+	"context"
+	"crypto/ecdsa"
+	"fmt"
+	"math/big"
+
+	"github.com/DIMO-Network/enclave-signer-registry/internal/config"
+	"github.com/DIMO-Network/enclave-signer-registry/internal/contracts/devlicensedimo"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
+)
+
+// Client represents a client for interacting with the DevLicense contract.
+// It handles enabling signers and other contract operations.
+type Client struct {
+	client   *ethclient.Client
+	contract *devlicensedimo.Devlicensedimo
+}
+
+// NewClient creates a new DevLicense client using the provided configuration.
+// It establishes a connection to the Ethereum network and initializes the contract instance.
+// Returns an error if any of the initialization steps fail.
+func NewClient(cfg *config.Settings) (*Client, error) {
+	// Connect to the Ethereum client
+	client, err := ethclient.Dial(cfg.EthereumRPCURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to Ethereum client: %w", err)
+	}
+
+	// Create the contract instance
+	contract, err := devlicensedimo.NewDevlicensedimo(cfg.DevLicenseContract, client)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create contract instance: %w", err)
+	}
+
+	return &Client{
+		client:   client,
+		contract: contract,
+	}, nil
+}
+
+// EnableSigner enables a signer address for the developer license.
+// It creates and sends a transaction to the contract to enable the specified signer.
+// Returns an error if the transaction fails or cannot be mined.
+func (c *Client) EnableSigner(privateKey *ecdsa.PrivateKey, devLicenseTokenID *big.Int, signerAddress common.Address) error {
+	if privateKey == nil {
+		return fmt.Errorf("private key is nil")
+	}
+	if devLicenseTokenID == nil {
+		return fmt.Errorf("dev license token ID is nil")
+	}
+
+	// Get the chain ID
+	chainID, err := c.client.ChainID(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to get chain ID: %w", err)
+	}
+
+	// Create the transaction signer
+	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
+	if err != nil {
+		return fmt.Errorf("failed to create transaction signer: %w", err)
+	}
+
+	// Call enableSigner
+	tx, err := c.contract.EnableSigner(auth, devLicenseTokenID, signerAddress)
+	if err != nil {
+		return fmt.Errorf("failed to enable signer: %w", err)
+	}
+
+	// Wait for the transaction to be mined
+	_, err = bind.WaitMined(context.Background(), c.client, tx)
+	if err != nil {
+		return fmt.Errorf("failed to wait for transaction: %w", err)
+	}
+
+	return nil
+}
+
+// GetTokenID returns the token ID for the developer license.
+func (c *Client) GetTokenID(devLicenseClientID common.Address) (*big.Int, error) {
+	return c.contract.ClientIdToTokenId(nil, devLicenseClientID)
+}
+
+// GetOwner returns the owner of the developer license.
+func (c *Client) GetOwner(devLicenseTokenID *big.Int) (common.Address, error) {
+	return c.contract.OwnerOf(nil, devLicenseTokenID)
+}
