@@ -1,7 +1,7 @@
 replicaCount: 1
 imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: ''
+fullnameOverride: ''
 podAnnotations: {}
 podSecurityContext: {}
 bridge:
@@ -16,16 +16,16 @@ bridge:
         - all
   env:
     LOG_LEVEL: TRACE
-    PORT: "8080"
-    MON_PORT: "8888"
-    VSOCK_INIT_PORT: "5000"
-    DEV_LICENSE_CONTRACT: "0x9A9D2E717bB005B240094ba761Ff074d392C7C85"
-    DEVELOPER_LICENSE: "0x332b18C8d30970FEc524b9f94091AD81d7C13EfD"
-    CHAIN_ID: "137"
+    PORT: '8080'
+    MON_PORT: '8888'
+    VSOCK_INIT_PORT: '5000'
+    DEV_LICENSE_CONTRACT: '0x9A9D2E717bB005B240094ba761Ff074d392C7C85'
+    DEVELOPER_LICENSE: '0x332b18C8d30970FEc524b9f94091AD81d7C13EfD'
+    CHAIN_ID: '137'
     TLS_ENABLED: false
     TLS_ACME_HOST_NAME: enclave-signer-registry.dev.dimo.zone
     TLS_ACME_CA_DIR_URL: https://acme-staging-v02.api.letsencrypt.org/directory
-    TLS_ACME_EMAIL: ""
+    TLS_ACME_EMAIL: ''
   ports:
     - name: mon-http
       containerPort: 8888
@@ -51,26 +51,26 @@ app:
   image:
     repository: dimozone/enclave-signer-registry
     pullPolicy: IfNotPresent
-    tag: 0b6dfd5
+    tag: 4cd379a
   securityContext:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
         - all
   env:
-    ENCLAVE_CPU_COUNT: "2"
-    ENCLAVE_MEMORY_SIZE: "1000"
-    ENCLAVE_CID: "16"
+    ENCLAVE_CPU_COUNT: '2'
+    ENCLAVE_MEMORY_SIZE: '1000'
+    ENCLAVE_CID: '16'
     ENCLAVE_DEBUG_MODE: null
   ports: null
   resources:
     limits:
-      aws.ec2.nitro/nitro_enclaves: "1"
+      aws.ec2.nitro/nitro_enclaves: '1'
       hugepages-1Gi: 1Gi
       memory: 512Mi
       cpu: 500m
     requests:
-      aws.ec2.nitro/nitro_enclaves: "1"
+      aws.ec2.nitro/nitro_enclaves: '1'
       hugepages-1Gi: 1Gi
       memory: 128Mi
       cpu: 100m
@@ -90,11 +90,11 @@ ingress:
   className: nginx
   annotations:
     nginx.ingress.kubernetes.io/auth-tls-secret: ingress/cf-origin-ca
-    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
-    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: 'on'
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: 'true'
     nginx.ingress.kubernetes.io/backend-protocol: HTTP
-    nginx.ingress.kubernetes.io/ssl-passthrough: "false"
-    nginx.ingress.kubernetes.io/limit-rps: "50"
+    nginx.ingress.kubernetes.io/ssl-passthrough: 'false'
+    nginx.ingress.kubernetes.io/limit-rps: '50'
     external-dns.alpha.kubernetes.io/hostname: enclave-signer-registry.dev.dimo.zone
   hosts:
     - host: enclave-signer-registry.dev.dimo.zone
@@ -108,7 +108,7 @@ autoscaling:
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
 nodeSelector:
-  enclave: "true"
+  enclave: 'true'
 affinity: {}
 podDisruptionBudget:
   minAvailable: 0
@@ -118,7 +118,7 @@ kafka:
 serviceAccount:
   create: true
   annotations: {}
-  name: ""
+  name: ''
 serviceMonitor:
   enabled: true
   path: /metrics
