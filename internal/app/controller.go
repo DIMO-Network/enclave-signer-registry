@@ -22,10 +22,6 @@ import (
 	"github.com/rs/zerolog"
 )
 
-const (
-	attestationVersion = "odometer-attestation/v0.0.1"
-)
-
 type Controller struct {
 	logger            *zerolog.Logger
 	privateKey        *ecdsa.PrivateKey
@@ -235,19 +231,6 @@ func (c *Controller) getCert() ([]byte, error) {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to marshal certificate")
 	}
 	return certBytes, nil
-}
-
-// signMessage signs the message with the configured private key.
-func signMessage(message string, privateKey *ecdsa.PrivateKey) (string, error) {
-	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(message), message)
-	sign := crypto.Keccak256Hash([]byte(msg))
-	signature, err := crypto.Sign(sign.Bytes(), privateKey)
-	if err != nil {
-		return "", err
-	}
-
-	signature[64] += 27 // Support old Ethereum format
-	return "0x" + hex.EncodeToString(signature), nil
 }
 
 // registerSigner enables a signer for the dev license token ID

@@ -74,4 +74,4 @@ generate-swagger: ## generate swagger documentation
 	go tool swag init -g cmd/$(BIN_NAME)/main.go --parseDependency --parseInternal
 
 generate-abi: ## generate abi
-	@go tool abigen --abi ./internal/contracts/devLicenseDimo/devLicenseDimo.json --pkg devlicensedimo --out ./internal/contracts/devlicensedimo/devLicenseDimo.go
+	@go tool abigen --abi ./internal/contracts/devlicensedimo/devLicenseDimo.json --pkg devlicensedimo --out ./internal/contracts/devlicensedimo/devLicenseDimo.go
