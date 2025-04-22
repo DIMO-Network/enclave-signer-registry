@@ -64,7 +64,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/nitrite.Result"
+                            "$ref": "#/definitions/internal_app.NSMAttestationResponse"
                         }
                     },
                     "500": {
@@ -176,7 +176,7 @@ const docTemplate = `{
         "internal_app.AddSignerRequest": {
             "type": "object",
             "properties": {
-                "attestationDoc": {
+                "attestationDocument": {
                     "type": "array",
                     "items": {
                         "type": "integer"
@@ -200,6 +200,20 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/github_com_DIMO-Network_enclave-signer-registry_internal_config.PCRValues"
+                    }
+                }
+            }
+        },
+        "internal_app.NSMAttestationResponse": {
+            "type": "object",
+            "properties": {
+                "attestation": {
+                    "$ref": "#/definitions/nitrite.Result"
+                },
+                "document": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
                     }
                 }
             }
