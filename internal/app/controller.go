@@ -5,7 +5,6 @@ import (
 	"crypto/ecdsa"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -15,6 +14,7 @@ import (
 	"github.com/DIMO-Network/enclave-signer-registry/internal/client/devlicense"
 	"github.com/DIMO-Network/enclave-signer-registry/internal/config"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gofiber/fiber/v2"
 	"github.com/hf/nitrite"
@@ -181,13 +181,15 @@ func (c *Controller) AddSigner(ctx *fiber.Ctx) error {
 	}
 
 	var attestationPCRs config.PCRValues
-	attestationPCRs.PCR0 = hex.EncodeToString(result.Document.PCRs[0])
-	attestationPCRs.PCR1 = hex.EncodeToString(result.Document.PCRs[1])
-	attestationPCRs.PCR2 = hex.EncodeToString(result.Document.PCRs[2])
+	attestationPCRs.PCR0 = hexutil.Bytes(result.Document.PCRs[0])
+	attestationPCRs.PCR1 = hexutil.Bytes(result.Document.PCRs[1])
+	attestationPCRs.PCR2 = hexutil.Bytes(result.Document.PCRs[2])
 
 	var valid bool
 	for _, pcr := range c.validPCRs {
-		if pcr == attestationPCRs {
+		if bytes.Equal(pcr.PCR0, attestationPCRs.PCR0) &&
+			bytes.Equal(pcr.PCR1, attestationPCRs.PCR1) &&
+			bytes.Equal(pcr.PCR2, attestationPCRs.PCR2) {
 			valid = true
 			break
 		}
