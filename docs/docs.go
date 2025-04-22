@@ -99,7 +99,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/signer": {
+        "/add-signer": {
             "post": {
                 "description": "Add a new signer by verifying their NSM attestation",
                 "consumes": [
@@ -119,7 +119,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/nitrite.Result"
+                            "$ref": "#/definitions/internal_app.AddSignerRequest"
                         }
                     }
                 ],
@@ -170,6 +170,20 @@ const docTemplate = `{
                     "items": {
                         "type": "integer"
                     }
+                }
+            }
+        },
+        "internal_app.AddSignerRequest": {
+            "type": "object",
+            "properties": {
+                "attestationDoc": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "signerAddress": {
+                    "type": "string"
                 }
             }
         },

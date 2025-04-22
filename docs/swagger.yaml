@@ -16,6 +16,15 @@ definitions:
           type: integer
         type: array
     type: object
+  internal_app.AddSignerRequest:
+    properties:
+      attestationDoc:
+        items:
+          type: integer
+        type: array
+      signerAddress:
+        type: string
+    type: object
   internal_app.DeveloperLicenseResponse:
     properties:
       clientId:
@@ -740,7 +749,7 @@ paths:
       summary: Get developer license
       tags:
       - keys
-  /signer:
+  /add-signer:
     post:
       consumes:
       - application/json
@@ -751,7 +760,7 @@ paths:
         name: attestation
         required: true
         schema:
-          $ref: '#/definitions/nitrite.Result'
+          $ref: '#/definitions/internal_app.AddSignerRequest'
       produces:
       - application/json
       responses:

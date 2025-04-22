@@ -83,7 +83,7 @@ func createApp(logger *zerolog.Logger, ctrl *Controller) *fiber.App {
 	})
 	app.Get("/.well-known/nsm-attestation", ctrl.GetNSMAttestations)
 	app.Get("/developer-license", ctrl.GetDeveloperLicense)
-	app.Get("/add-signer", ctrl.AddSigner)
+	app.Post("/add-signer", ctrl.AddSigner)
 	return app
 }
 

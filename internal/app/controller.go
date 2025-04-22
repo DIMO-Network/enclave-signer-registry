@@ -154,11 +154,11 @@ type AddSignerRequest struct {
 // @Tags signer
 // @Accept json
 // @Produce json
-// @Param attestation body nitrite.Result true "NSM attestation document"
+// @Param attestation body AddSignerRequest true "NSM attestation document"
 // @Success 200 {object} codeResp
 // @Failure 400 {object} codeResp
 // @Failure 500 {object} codeResp
-// @Router /signer [post]
+// @Router /add-signer [post]
 func (c *Controller) AddSigner(ctx *fiber.Ctx) error {
 	var request AddSignerRequest
 	if err := ctx.BodyParser(&request); err != nil {
