@@ -150,6 +150,29 @@ const docTemplate = `{
         "big.Int": {
             "type": "object"
         },
+        "github_com_DIMO-Network_enclave-signer-registry_internal_config.PCRValues": {
+            "type": "object",
+            "properties": {
+                "pcr0": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "pcr1": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "pcr2": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
         "internal_app.DeveloperLicenseResponse": {
             "type": "object",
             "properties": {
@@ -158,6 +181,12 @@ const docTemplate = `{
                 },
                 "tokenId": {
                     "type": "string"
+                },
+                "validPCRs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_DIMO-Network_enclave-signer-registry_internal_config.PCRValues"
+                    }
                 }
             }
         },

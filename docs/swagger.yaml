@@ -1,12 +1,31 @@
 definitions:
   big.Int:
     type: object
+  github_com_DIMO-Network_enclave-signer-registry_internal_config.PCRValues:
+    properties:
+      pcr0:
+        items:
+          type: integer
+        type: array
+      pcr1:
+        items:
+          type: integer
+        type: array
+      pcr2:
+        items:
+          type: integer
+        type: array
+    type: object
   internal_app.DeveloperLicenseResponse:
     properties:
       clientId:
         type: string
       tokenId:
         type: string
+      validPCRs:
+        items:
+          $ref: '#/definitions/github_com_DIMO-Network_enclave-signer-registry_internal_config.PCRValues'
+        type: array
     type: object
   internal_app.codeResp:
     properties:
