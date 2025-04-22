@@ -188,21 +188,22 @@ func (c *Controller) AddSigner(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Attestation document signature verification failed")
 	}
 
-	var attestationPCRs config.PCRValues
-	attestationPCRs.PCR0 = hexutil.Bytes(result.Document.PCRs[0])
-	attestationPCRs.PCR1 = hexutil.Bytes(result.Document.PCRs[1])
-	attestationPCRs.PCR2 = hexutil.Bytes(result.Document.PCRs[2])
-
 	var valid bool
-	for _, pcr := range c.validPCRs {
-		if bytes.Equal(pcr.PCR0, attestationPCRs.PCR0) &&
-			bytes.Equal(pcr.PCR1, attestationPCRs.PCR1) &&
-			bytes.Equal(pcr.PCR2, attestationPCRs.PCR2) {
+	for i := range c.validPCRs {
+		if bytes.Equal(c.validPCRs[i].PCR0, result.Document.PCRs[0]) &&
+			bytes.Equal(c.validPCRs[i].PCR1, result.Document.PCRs[1]) &&
+			bytes.Equal(c.validPCRs[i].PCR2, result.Document.PCRs[2]) {
 			valid = true
 			break
 		}
 	}
 	if !valid {
+		// make PCRs easier to read
+		attestationPCRs := config.PCRValues{
+			PCR0: hexutil.Bytes(result.Document.PCRs[0]),
+			PCR1: hexutil.Bytes(result.Document.PCRs[1]),
+			PCR2: hexutil.Bytes(result.Document.PCRs[2]),
+		}
 		c.logger.Error().Any("attestationPCRs", attestationPCRs).Any("validPCRs", c.validPCRs).Msg("Attestation document PCR values do not match")
 		return fiber.NewError(fiber.StatusBadRequest, "Attestation document PCR values do not match")
 	}
@@ -252,7 +253,7 @@ func (c *Controller) getCert() ([]byte, error) {
 	return certBytes, nil
 }
 
-// registerSigner enables a signer for the dev license token ID
+// registerSigner enables a signer for the dev license token ID.
 func (c *Controller) registerSigner(signerAddress common.Address) error {
 	err := c.devLicenseClient.EnableSigner(c.privateKey, c.devLicenseTokenID, signerAddress)
 	if err != nil {

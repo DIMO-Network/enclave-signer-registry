@@ -67,7 +67,14 @@ func (c *Client) EnableSigner(privateKey *ecdsa.PrivateKey, devLicenseTokenID *b
 	if err != nil {
 		return fmt.Errorf("failed to create transaction signer: %w", err)
 	}
-
+	// skip if the signer is already enabled
+	enabled, err := c.contract.IsSigner(nil, devLicenseTokenID, signerAddress)
+	if err != nil {
+		return fmt.Errorf("failed to check if signer is enabled: %w", err)
+	}
+	if enabled {
+		return nil
+	}
 	// Call enableSigner
 	tx, err := c.contract.EnableSigner(auth, devLicenseTokenID, signerAddress)
 	if err != nil {
