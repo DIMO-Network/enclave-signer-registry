@@ -72,6 +72,11 @@ func NewController(
 	}, nil
 }
 
+type NSMAttestationResponse struct {
+	Result    *nitrite.Result `json:"attestation"`
+	RawResult []byte          `json:"document"`
+}
+
 // GetNSMAttestations godoc
 // @Summary Get NSM attestation
 // @Description Get the Nitro Security Module attestation
@@ -79,7 +84,7 @@ func NewController(
 // @Accept json
 // @Produce json
 // @Param nonce query string false "Optional nonce for attestation"
-// @Success 200 {object} nitrite.Result
+// @Success 200 {object} NSMAttestationResponse
 // @Failure 500 {object} codeResp
 // @Router /.well-known/nsm-attestation [get]
 func (c *Controller) GetNSMAttestations(ctx *fiber.Ctx) error {
@@ -108,7 +113,7 @@ func (c *Controller) GetNSMAttestations(ctx *fiber.Ctx) error {
 		UserData: certBytes,
 		Nonce:    nonceBytes,
 	}
-	nsmResult, err := attest.GetNSMAttestation(req)
+	docuemnt, nsmResult, err := attest.GetNSMAttestation(req)
 	if err != nil {
 		c.logger.Error().Err(err).Msg("Failed to get NSM attestation")
 		return fiber.NewError(fiber.StatusInternalServerError, "Failed to get NSM attestation")
@@ -117,7 +122,10 @@ func (c *Controller) GetNSMAttestations(ctx *fiber.Ctx) error {
 		// only cache the result if nonce is empty
 		c.nsmResult = nsmResult
 	}
-	return ctx.JSON(nsmResult)
+	return ctx.JSON(NSMAttestationResponse{
+		Result:    nsmResult,
+		RawResult: docuemnt,
+	})
 }
 
 type DeveloperLicenseResponse struct {
@@ -144,8 +152,8 @@ func (c *Controller) GetDeveloperLicense(ctx *fiber.Ctx) error {
 }
 
 type AddSignerRequest struct {
-	SignerAddress  string `json:"signerAddress"`
-	AttestationDoc []byte `json:"attestationDoc"`
+	SignerAddress       string `json:"signerAddress"`
+	AttestationDocument []byte `json:"attestationDocument"`
 }
 
 // AddSigner godoc
@@ -170,7 +178,7 @@ func (c *Controller) AddSigner(ctx *fiber.Ctx) error {
 	opts := nitrite.VerifyOptions{
 		CurrentTime: time.Now(),
 	}
-	result, err := nitrite.Verify(request.AttestationDoc, opts)
+	result, err := nitrite.Verify(request.AttestationDocument, opts)
 	if err != nil {
 		c.logger.Error().Err(err).Msg("Failed to verify attestation document")
 		return fiber.NewError(fiber.StatusBadRequest, "Failed to verify attestation document")
