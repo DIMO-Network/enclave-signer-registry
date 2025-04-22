@@ -90,8 +90,8 @@ func (c *Controller) GetNSMAttestations(ctx *fiber.Ctx) error {
 	}
 	nonce := ctx.Query("nonce")
 
-	// if not expired, return the cached result
-	if nonce == "" || c.nsmResult != nil && len(c.nsmResult.Certificates) > 0 &&
+	// if nonce is empty, check if the cached result is valid
+	if nonce == "" && c.nsmResult != nil && len(c.nsmResult.Certificates) > 0 &&
 		c.nsmResult.Certificates[0] != nil &&
 		c.nsmResult.Certificates[0].NotAfter.After(time.Now()) &&
 		bytes.Equal(c.nsmResult.Document.UserData, certBytes) {
@@ -108,17 +108,22 @@ func (c *Controller) GetNSMAttestations(ctx *fiber.Ctx) error {
 		UserData: certBytes,
 		Nonce:    nonceBytes,
 	}
-	c.nsmResult, err = attest.GetNSMAttestation(req)
+	nsmResult, err := attest.GetNSMAttestation(req)
 	if err != nil {
 		c.logger.Error().Err(err).Msg("Failed to get NSM attestation")
 		return fiber.NewError(fiber.StatusInternalServerError, "Failed to get NSM attestation")
 	}
-	return ctx.JSON(c.nsmResult)
+	if nonce == "" {
+		// only cache the result if nonce is empty
+		c.nsmResult = nsmResult
+	}
+	return ctx.JSON(nsmResult)
 }
 
 type DeveloperLicenseResponse struct {
-	ClientId string `json:"clientId"`
-	TokenId  string `json:"tokenId"`
+	ClientId  string             `json:"clientId"`
+	TokenId   string             `json:"tokenId"`
+	ValidPCRs []config.PCRValues `json:"validPCRs"`
 }
 
 // GetDeveloperLicense godoc
@@ -131,8 +136,9 @@ type DeveloperLicenseResponse struct {
 // @Router /Developer-license [get]
 func (c *Controller) GetDeveloperLicense(ctx *fiber.Ctx) error {
 	developerLicenseResponse := DeveloperLicenseResponse{
-		ClientId: c.devLicense.String(),
-		TokenId:  c.devLicenseTokenID.String(),
+		ClientId:  c.devLicense.String(),
+		TokenId:   c.devLicenseTokenID.String(),
+		ValidPCRs: c.validPCRs,
 	}
 	return ctx.JSON(developerLicenseResponse)
 }
