@@ -54,7 +54,7 @@ app:
   image:
     repository: dimozone/enclave-signer-registry
     pullPolicy: IfNotPresent
-    tag: 9e4b598
+    tag: b1285f7
   securityContext:
     allowPrivilegeEscalation: false
     capabilities:
