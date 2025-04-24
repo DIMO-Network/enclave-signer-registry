@@ -127,7 +127,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_app.codeResp"
+                            "$ref": "#/definitions/internal_app.AddSignerResponse"
                         }
                     },
                     "400": {
@@ -183,6 +183,17 @@ const docTemplate = `{
                     }
                 },
                 "signerAddress": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_app.AddSignerResponse": {
+            "type": "object",
+            "properties": {
+                "alreadyAdded": {
+                    "type": "boolean"
+                },
+                "txHash": {
                     "type": "string"
                 }
             }

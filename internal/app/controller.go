@@ -155,6 +155,10 @@ type AddSignerRequest struct {
 	SignerAddress       string `json:"signerAddress"`
 	AttestationDocument []byte `json:"attestationDocument"`
 }
+type AddSignerResponse struct {
+	TxHash       string `json:"txHash"`
+	AlreadyAdded bool   `json:"alreadyAdded"`
+}
 
 // AddSigner godoc
 // @Summary Add a new signer
@@ -163,7 +167,7 @@ type AddSignerRequest struct {
 // @Accept json
 // @Produce json
 // @Param attestation body AddSignerRequest true "NSM attestation document"
-// @Success 200 {object} codeResp
+// @Success 200 {object} AddSignerResponse
 // @Failure 400 {object} codeResp
 // @Failure 500 {object} codeResp
 // @Router /add-signer [post]
@@ -220,15 +224,19 @@ func (c *Controller) AddSigner(ctx *fiber.Ctx) error {
 	}
 
 	c.logger.Info().Str("signerAddress", request.SignerAddress).Msg("Registering new signer")
-	err = c.registerSigner(docAddress)
+	txHash, err := c.registerSigner(docAddress)
+	alreadyAdded := false
 	if err != nil {
-		c.logger.Error().Err(err).Msg("Failed to register signer")
-		return fiber.NewError(fiber.StatusInternalServerError, "Failed to register signer")
+		if !errors.Is(err, devlicense.ErrAlreadyEnabled) {
+			c.logger.Error().Err(err).Msg("Failed to register signer")
+			return fiber.NewError(fiber.StatusInternalServerError, "Failed to register signer")
+		}
+		alreadyAdded = true
 	}
 	c.logger.Debug().Str("signerAddress", request.SignerAddress).Msg("Signer registered")
-	return ctx.JSON(codeResp{
-		Code:    200,
-		Message: "Signer Registered",
+	return ctx.JSON(AddSignerResponse{
+		TxHash:       txHash,
+		AlreadyAdded: alreadyAdded,
 	})
 }
 
@@ -255,19 +263,10 @@ func (c *Controller) getCert() ([]byte, error) {
 }
 
 // registerSigner enables a signer for the dev license token ID.
-func (c *Controller) registerSigner(signerAddress common.Address) error {
+func (c *Controller) registerSigner(signerAddress common.Address) (string, error) {
 	tx, err := c.devLicenseClient.EnableSigner(c.privateKey, c.devLicenseTokenID, signerAddress)
 	if err != nil {
-		return fmt.Errorf("failed to enable signer: %w", err)
+		return "", fmt.Errorf("failed to enable signer: %w", err)
 	}
-	if errors.Is(err, devlicense.ErrAlreadyEnabled) {
-		c.logger.Debug().Str("signerAddress", signerAddress.Hex()).Msg("Signer already enabled")
-		return nil
-	}
-	c.logger.Info().Str("txHash", tx.Hash().Hex()).Msg("Waiting for transaction to be mined")
-	_, err = c.devLicenseClient.WaitForTransaction(tx)
-	if err != nil {
-		return fmt.Errorf("failed to wait for transaction: %w", err)
-	}
-	return nil
+	return tx.Hash().Hex(), nil
 }

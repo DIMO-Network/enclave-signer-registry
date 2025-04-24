@@ -25,6 +25,13 @@ definitions:
       signerAddress:
         type: string
     type: object
+  internal_app.AddSignerResponse:
+    properties:
+      alreadyAdded:
+        type: boolean
+      txHash:
+        type: string
+    type: object
   internal_app.DeveloperLicenseResponse:
     properties:
       clientId:
@@ -776,7 +783,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_app.codeResp'
+            $ref: '#/definitions/internal_app.AddSignerResponse'
         "400":
           description: Bad Request
           schema:
