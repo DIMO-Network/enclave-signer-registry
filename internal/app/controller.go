@@ -256,9 +256,18 @@ func (c *Controller) getCert() ([]byte, error) {
 
 // registerSigner enables a signer for the dev license token ID.
 func (c *Controller) registerSigner(signerAddress common.Address) error {
-	err := c.devLicenseClient.EnableSigner(c.privateKey, c.devLicenseTokenID, signerAddress)
+	tx, err := c.devLicenseClient.EnableSigner(c.privateKey, c.devLicenseTokenID, signerAddress)
 	if err != nil {
 		return fmt.Errorf("failed to enable signer: %w", err)
+	}
+	if errors.Is(err, devlicense.ErrAlreadyEnabled) {
+		c.logger.Debug().Str("signerAddress", signerAddress.Hex()).Msg("Signer already enabled")
+		return nil
+	}
+	c.logger.Info().Str("txHash", tx.Hash().Hex()).Msg("Waiting for transaction to be mined")
+	_, err = c.devLicenseClient.WaitForTransaction(tx)
+	if err != nil {
+		return fmt.Errorf("failed to wait for transaction: %w", err)
 	}
 	return nil
 }
