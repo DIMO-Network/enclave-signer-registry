@@ -103,6 +103,7 @@ ingress:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: 'true'
     nginx.ingress.kubernetes.io/backend-protocol: HTTP
     nginx.ingress.kubernetes.io/ssl-passthrough: 'false'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "360s"
     nginx.ingress.kubernetes.io/limit-rps: '50'
     external-dns.alpha.kubernetes.io/hostname: enclave-signer-registry.dev.dimo.zone
   hosts:
