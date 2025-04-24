@@ -219,12 +219,13 @@ func (c *Controller) AddSigner(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Signer address does not match document address")
 	}
 
+	c.logger.Info().Str("signerAddress", request.SignerAddress).Msg("Registering new signer")
 	err = c.registerSigner(docAddress)
 	if err != nil {
 		c.logger.Error().Err(err).Msg("Failed to register signer")
 		return fiber.NewError(fiber.StatusInternalServerError, "Failed to register signer")
 	}
-
+	c.logger.Debug().Str("signerAddress", request.SignerAddress).Msg("Signer registered")
 	return ctx.JSON(codeResp{
 		Code:    200,
 		Message: "Signer Registered",

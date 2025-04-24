@@ -73,14 +73,6 @@ func createApp(logger *zerolog.Logger, ctrl *Controller) *fiber.App {
 	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	app.Get("/", HealthCheck)
-	app.Get("/forward", func(ctx *fiber.Ctx) error {
-		logger.Debug().Msg("Forward request received")
-		msg := ctx.Query("msg")
-		if msg == "" {
-			msg = "Hello, World!"
-		}
-		return ctx.JSON(map[string]string{"data": "Hello From The Enclave! Did you say: " + msg})
-	})
 	app.Get("/.well-known/nsm-attestation", ctrl.GetNSMAttestations)
 	app.Get("/developer-license", ctrl.GetDeveloperLicense)
 	app.Post("/add-signer", ctrl.AddSigner)
