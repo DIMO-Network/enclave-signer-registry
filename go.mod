@@ -3,7 +3,7 @@ module github.com/DIMO-Network/enclave-signer-registry
 go 1.24
 
 require (
-	github.com/DIMO-Network/enclave-bridge v0.0.2-0.20250422015924-3a7e68f3b26b
+	github.com/DIMO-Network/enclave-bridge v0.0.2-0.20250425173121-bf34aab677d1
 	github.com/ethereum/go-ethereum v1.15.7
 	github.com/gofiber/fiber/v2 v2.52.6
 	github.com/gofiber/swagger v1.1.1
@@ -59,6 +59,7 @@ require (
 	github.com/go-openapi/spec v0.20.4 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/gofrs/flock v0.12.1 // indirect
+	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
