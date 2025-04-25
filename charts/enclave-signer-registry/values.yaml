@@ -26,7 +26,7 @@ bridge:
     TLS_ACME_HOST_NAME: enclave-signer-registry.dev.dimo.zone
     TLS_ACME_CA_DIR_URL: https://acme-staging-v02.api.letsencrypt.org/directory
     TLS_ACME_EMAIL: ''
-    PCRS_0_PCR0: eb1da05b66ad4e1f77a13bf96b094aedbe8c57ea71952f669e1d76dbbe5137ea7bd4e290e292b07d572b86434f9a6f8c
+    PCRS_0_PCR0: '0xeb1da05b66ad4e1f77a13bf96b094aedbe8c57ea71952f669e1d76dbbe5137ea7bd4e290e292b07d572b86434f9a6f8c'
     PCRS_0_PCR1: '0xfa2593b59f3e4fc7daba5cbdddfd3449d67cd02d43bb1128885e8f38b914d081dccdb68fff6d5b7a76bcb866a18a74a3'
     PCRS_0_PCR2: '0x766e81ef2eaac991280ed0da1756d4400d28d4b421c37bf4722d92e7bd4cc9ff4e8fedcdad5846a1bc4894dbe8bb4fb5'
     PCRS_1_PCR0: '0xaabaae3f0f212d9156449a9ab3d04ca0c7d35987f136e2d0efc4e16af0bcbf3a93c54a40122c05a44992d3d7bb27897d'
@@ -60,7 +60,7 @@ app:
   image:
     repository: dimozone/enclave-signer-registry
     pullPolicy: IfNotPresent
-    tag: d7ada0e
+    tag: 9359f52
   securityContext:
     allowPrivilegeEscalation: false
     capabilities:
