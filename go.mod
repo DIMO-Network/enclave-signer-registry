@@ -3,12 +3,11 @@ module github.com/DIMO-Network/enclave-signer-registry
 go 1.24
 
 require (
-	github.com/DIMO-Network/enclave-bridge v0.0.2-0.20250425173121-bf34aab677d1
+	github.com/DIMO-Network/enclave-bridge v0.0.2-0.20250428133245-3c96082c462e
 	github.com/ethereum/go-ethereum v1.15.7
 	github.com/gofiber/fiber/v2 v2.52.6
 	github.com/gofiber/swagger v1.1.1
 	github.com/hf/nitrite v0.0.0-20241225144000-c2d5d3c4f303
-	github.com/hf/nsm v0.0.0-20220930140112-cd181bd646b9
 	github.com/mdlayher/vsock v1.2.1
 	github.com/rs/zerolog v1.34.0
 	github.com/swaggo/swag v1.16.4
@@ -67,6 +66,7 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/graph-gophers/graphql-go v1.3.0 // indirect
 	github.com/hashicorp/go-bexpr v0.1.10 // indirect
+	github.com/hf/nsm v0.0.0-20220930140112-cd181bd646b9 // indirect
 	github.com/holiman/billy v0.0.0-20240216141850-2abb0c79d3c4 // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.3.2 // indirect

@@ -14,10 +14,10 @@ import (
 	"github.com/DIMO-Network/enclave-bridge/pkg/certs"
 	"github.com/DIMO-Network/enclave-bridge/pkg/certs/acme"
 	"github.com/DIMO-Network/enclave-bridge/pkg/client"
+	"github.com/DIMO-Network/enclave-bridge/pkg/wellknown"
 	"github.com/DIMO-Network/enclave-signer-registry/internal/client/devlicense"
 	"github.com/DIMO-Network/enclave-signer-registry/internal/config"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/swagger"
 	"github.com/rs/zerolog"
@@ -44,17 +44,22 @@ func CreateEnclaveWebServer(ctx context.Context, logger *zerolog.Logger, clientP
 		return nil, nil, fmt.Errorf("failed to create dev license client: %w", err)
 	}
 	// Setup the controller with all its dependencies
-	ctrl, err := NewController(settings, logger, certFunc, devLicenseClient)
+	ctrl, err := NewController(settings, devLicenseClient)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to setup controller: %w", err)
 	}
 
-	app := createApp(logger, ctrl)
+	wellKnownCtrl, err := wellknown.NewController(nil, certFunc)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to setup well known controller: %w", err)
+	}
+
+	app := createApp(logger, ctrl, wellKnownCtrl)
 
 	return app, tlsConfig, nil
 }
 
-func createApp(logger *zerolog.Logger, ctrl *Controller) *fiber.App {
+func createApp(logger *zerolog.Logger, ctrl *Controller, wellKnownCtrl *wellknown.Controller) *fiber.App {
 	app := fiber.New(fiber.Config{
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			return ErrorHandler(c, err, logger)
@@ -67,15 +72,21 @@ func createApp(logger *zerolog.Logger, ctrl *Controller) *fiber.App {
 		EnableStackTrace:  true,
 		StackTraceHandler: nil,
 	}))
-	app.Use(cors.New())
+
+	app.Use(func(c *fiber.Ctx) error {
+		userCtx := logger.With().Str("httpPath", strings.TrimPrefix(c.Path(), "/")).
+			Str("httpMethod", c.Method()).Logger().WithContext(c.UserContext())
+		c.SetUserContext(userCtx)
+		return c.Next()
+	})
 
 	// Swagger documentation
 	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	app.Get("/", HealthCheck)
-	app.Get("/.well-known/nsm-attestation", ctrl.GetNSMAttestations)
 	app.Get("/developer-license", ctrl.GetDeveloperLicense)
 	app.Post("/add-signer", ctrl.AddSigner)
+	wellknown.RegisterRoutes(app, wellKnownCtrl)
 	return app
 }
 

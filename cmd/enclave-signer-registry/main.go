@@ -51,6 +51,11 @@ func main() {
 		logger.Fatal().Err(err).Msg("Failed to create logger socket.")
 	}
 	defer cleanup()
+
+	go func() {
+		<-ctx.Done()
+		logger.Info().Msg("Received signal in enclave, shutting down...")
+	}()
 	logger.Debug().Msg("Starting enclave app")
 	cid, err := vsock.ContextID()
 	if err != nil {
