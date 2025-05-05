@@ -160,7 +160,16 @@ func updateValuesYAML(filePath string, info *UpdateInfo) error {
 	info.NewIndex = maxIndex + 1
 
 	// Print commit message with PCR values
-	fmt.Printf("\nAdding PCRs for commit %s:\n", os.Args[1])
+	commitURL := os.Args[1]
+	// Extract owner/repo@sha format from URL
+	// Example: https://github.com/owner/repo/commit/abc123 -> owner/repo@abc123
+	re := regexp.MustCompile(`github\.com/([^/]+)/([^/]+)/commit/([0-9a-f]+)`)
+	matches := re.FindStringSubmatch(commitURL)
+	if len(matches) == 4 {
+		fmt.Printf("\nAdding PCRs for %s/%s@%s:\n", matches[1], matches[2], matches[3])
+	} else {
+		fmt.Printf("\nAdding PCRs for %s:\n", commitURL)
+	}
 
 	// Convert YAML content to string
 	content := string(data)
