@@ -13,6 +13,7 @@ import (
 	// import docs for swagger generation.
 	bridgecfg "github.com/DIMO-Network/enclave-bridge/pkg/config"
 	"github.com/DIMO-Network/enclave-bridge/pkg/enclave"
+	"github.com/DIMO-Network/enclave-bridge/pkg/enclave/handshake"
 	"github.com/DIMO-Network/enclave-bridge/pkg/watchdog"
 	"github.com/rs/zerolog"
 
@@ -44,6 +45,7 @@ const (
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
+	group, gCtx := errgroup.WithContext(ctx)
 	// Create a logger that can be used to log messages to the enclave-bridge.
 	logger, cleanup, err := enclave.GetAndSetDefaultLoggerWithSocket(appName, enclave.StdoutPort)
 	if err != nil {
@@ -62,12 +64,12 @@ func main() {
 		logger.Fatal().Err(err).Msg("Failed to get context ID.")
 	}
 
-	var enclaveSetup enclave.EnclaveSetup
-	err = enclaveSetup.Start(ctx)
+	var enclaveSetup handshake.BridgeHandshake
+	err = enclaveSetup.StartHandshake(ctx)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Failed to setup bridge.")
 	}
-	settings, err := enclave.ConfigFromEnvMap[config.Settings](enclaveSetup.Environment())
+	settings, err := handshake.ConfigFromEnvMap[config.Settings](enclaveSetup.Environment())
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Failed to get enclave settings.")
 	}
@@ -98,10 +100,7 @@ func main() {
 	}
 
 	// Send the bridge configuration to the enclave.
-	err = enclaveSetup.SendBridgeConfig(ctx, &bridgeSettings)
-	if err != nil {
-		logger.Fatal().Err(err).Msg("Failed to setup bridge.")
-	}
+	runHandshake(ctx, &enclaveSetup, &bridgeSettings, group)
 
 	// Wait for the bridge to be setup.
 	logger.Debug().Msg("Waiting for bridge setup")
@@ -123,13 +122,23 @@ func main() {
 		logger.Fatal().Err(err).Msg("Couldn't create enclave web server.")
 	}
 
-	group, gCtx := errgroup.WithContext(ctx)
 	RunFiberWithListener(gCtx, enclaveApp, listener, tlsConfig, group)
 
 	err = group.Wait()
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Failed to run servers.")
 	}
+}
+
+// runHandshake runs the handshake and returns a context that can be used to stop the handshake.
+func runHandshake(ctx context.Context, bridgeSetup *handshake.BridgeHandshake, bridgeSettings *bridgecfg.BridgeSettings, group *errgroup.Group) {
+	group.Go(func() error {
+		err := bridgeSetup.FinishHandshakeAndWait(ctx, bridgeSettings)
+		if err != nil {
+			return fmt.Errorf("failed to run handshake: %w", err)
+		}
+		return nil
+	})
 }
 
 // RunFiberWithListener runs a fiber server with a listener and returns a context that can be used to stop the server.

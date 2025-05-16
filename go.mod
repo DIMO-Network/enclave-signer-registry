@@ -3,7 +3,7 @@ module github.com/DIMO-Network/enclave-signer-registry
 go 1.24
 
 require (
-	github.com/DIMO-Network/enclave-bridge v0.0.2-0.20250428133245-3c96082c462e
+	github.com/DIMO-Network/enclave-bridge v0.0.2-0.20250516171304-195da01ee49b
 	github.com/ethereum/go-ethereum v1.15.7
 	github.com/gofiber/fiber/v2 v2.52.6
 	github.com/gofiber/swagger v1.1.1
@@ -12,6 +12,7 @@ require (
 	github.com/rs/zerolog v1.34.0
 	github.com/swaggo/swag v1.16.4
 	golang.org/x/sync v0.12.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -27,6 +28,7 @@ require (
 	github.com/bits-and-blooms/bitset v1.17.0 // indirect
 	github.com/caarlos0/env/v11 v11.3.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
+	github.com/cenkalti/backoff/v5 v5.0.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cockroachdb/errors v1.11.3 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240606204812-0bbfbd93a7ce // indirect
@@ -131,7 +133,6 @@ require (
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
