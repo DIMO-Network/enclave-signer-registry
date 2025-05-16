@@ -165,9 +165,10 @@ func (c *Controller) AddSigner(ctx *fiber.Ctx) error {
 			logger.Error().Err(err).Msg("Failed to register signer")
 			return fiber.NewError(fiber.StatusInternalServerError, "Failed to register signer")
 		}
+		logger.Debug().Str("signerAddress", request.SignerAddress).Msg("Signer already registered")
 		alreadyAdded = true
 	}
-	logger.Debug().Str("signerAddress", request.SignerAddress).Msg("Signer registered")
+	logger.Debug().Str("signerAddress", request.SignerAddress).Str("txHash", txHash).Msg("Signer registered")
 	return ctx.JSON(AddSignerResponse{
 		TxHash:       txHash,
 		AlreadyAdded: alreadyAdded,
