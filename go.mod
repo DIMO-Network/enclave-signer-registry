@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/DIMO-Network/enclave-bridge v0.0.2-0.20250516171304-195da01ee49b
 	github.com/ethereum/go-ethereum v1.15.7
-	github.com/gofiber/fiber/v2 v2.52.6
+	github.com/gofiber/fiber/v2 v2.52.7
 	github.com/gofiber/swagger v1.1.1
 	github.com/hf/nitrite v0.0.0-20241225144000-c2d5d3c4f303
 	github.com/mdlayher/vsock v1.2.1
